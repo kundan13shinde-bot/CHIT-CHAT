@@ -5,6 +5,8 @@ import clerkWebhook from "./webhooks/clerk.js";
 import userRoutes from "./routes/user.routes.js";
 import { ConnectDB } from "./lib/db.js";
 
+import authRoutes from "./routes/auth.js";
+
 import { clerkMiddleware } from "@clerk/express";
 
 const app = express();
@@ -19,6 +21,7 @@ app.use(cors({origin : FRONTEND_URL, credentials:true}))
 app.use(clerkMiddleware())
 
 app.use("/api/users", userRoutes)
+app.use("/api/auth", authRoutes)
 
 app.get("/health", (req,res) => {
 res.status(200).json({ok:true})

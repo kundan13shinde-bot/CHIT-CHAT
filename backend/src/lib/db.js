@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 export     async function ConnectDB() {
     try {
         const mongoUri = process.env.MONGO_URI
-
+         
         if(!mongoUri){
             throw new Error("MONGO_URI is required")
         }
@@ -13,6 +13,6 @@ export     async function ConnectDB() {
     }
     catch(error){
         console.log("MongoDB connection error", error.message);
-        process.exit(1);
+        process.exit(1     );
     }
 }
