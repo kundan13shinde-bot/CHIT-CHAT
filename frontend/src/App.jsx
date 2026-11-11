@@ -1,42 +1,22 @@
-import { useEffect } from 'react';
 import './App.css'
-import { Show, SignInButton, SignUpButton, UserButton, useAuth } from '@clerk/react';
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+import { Navigate, Route, Routes } from 'react-router'
+import ChatPage from './Pages/ChatPage.jsx'
+import AuthPage from './Pages/AuthPage.jsx'
+import { useAuth } from '@clerk/react'
+import PageLoader from './components/auth/PageLoader.jsx'
 
 function App() {
-  const { isSignedIn, getToken } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth()
 
-  // Saves the signed-in Clerk user to MongoDB (the webhook does the same when it can reach the backend).
-  useEffect(() => {
-    if (!isSignedIn) return;
-    (async () => {
-      try {
-        const token = await getToken();
-        await fetch(`${API_URL}/api/users/sync`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      } catch (error) {
-        console.error("Failed to sync user", error);
-      }
-    })();
-  }, [isSignedIn, getToken]);
+  // Wait for Clerk to finish loading, otherwise we'd redirect before knowing the auth state.
+  if (!isLoaded) return <PageLoader />
 
   return (
-    <div>
-      <h1>MY APP</h1>
-          <header>
-        <Show when="signed-out">
-          <SignInButton mode = "modal"/>
-          <SignUpButton mode = "modal"/>
-        </Show>
-        <Show when="signed-in">
-          <UserButton />
-        </Show>
-      </header>
-    </div>
-    )
+    <Routes>
+      <Route path="/" element={isSignedIn ? <ChatPage /> : <Navigate to="/auth" replace />} />
+      <Route path="/auth" element={!isSignedIn ? <AuthPage /> : <Navigate to="/" replace />} />
+    </Routes>
+  )
 }
 
 export default App

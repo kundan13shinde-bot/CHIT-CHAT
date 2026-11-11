@@ -1,10 +1,13 @@
 import "dotenv/config";
 import ImageKit, { toFile } from "@imagekit/nodejs";
 
-const imagekit = new ImageKit({ privateKey: process.env.IMAGEKIT_PRIVATE_KEY || "missing" });
+const imagekitPrivateKey =
+  process.env.IMAGEKIT_PRIVATE_KEY || process.env.IMAGE_KIT_PRIVATE_KEY;
 
-function hasImageKitConfig(){
-    return Boolean(process.env.IMAGEKIT_PRIVATE_KEY);
+const imagekit = new ImageKit({ privateKey: imagekitPrivateKey || "missing" });
+
+function hasImageKitConfig() {
+  return Boolean(imagekitPrivateKey);
 }
 
 function createFileName(originalName = "upload"){
