@@ -8,7 +8,7 @@ function IntroPanel() {
   return (
     <section className="flex flex-1 flex-col gap-3 border-b border-separator p-8 md:border-b-0 md:border-r">
       <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted">Secure gateway</p>
-      <h1 className="font-mono text-lg font-bold uppercase tracking-wider">Open iMessage</h1>
+      <h1 className="font-mono text-lg font-bold uppercase tracking-wider">Open CHIT-CHAT</h1>
       <p className="max-w-md font-mono text-[11px] text-muted">
         Chats, photos, and reactions stay in sync — sign in on the right to continue.
       </p>
@@ -25,7 +25,7 @@ function SignInCard() {
   return (
     <section className="flex flex-1 items-center justify-center p-8">
       <div className="flex w-full max-w-xs flex-col items-center gap-4 rounded-3xl border border-border bg-surface/80 p-8 shadow-xl">
-        <img src="/logo.png" alt="iMessage" className="size-12 rounded-xl" />
+        <img src="/logo.png" alt="CHIT-CHAT" className="size-12 rounded-xl" />
 
         <p className="flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-accent">
           <Sparkles size={12} /> Secure entry

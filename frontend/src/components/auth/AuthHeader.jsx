@@ -24,7 +24,7 @@ export default function AuthHeader() {
       <div className="flex items-center gap-3">
         <img src="/logo.png" alt="" className="size-5 rounded-md" />
         <div className="leading-tight">
-          <p className="text-sm font-semibold">iMessage</p>
+          <p className="text-sm font-semibold">CHIT-CHAT</p>
           <p className="text-[10px] text-muted">Private session</p>
         </div>
       </div>
