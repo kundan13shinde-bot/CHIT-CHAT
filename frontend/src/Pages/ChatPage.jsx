@@ -1,21 +1,54 @@
-import AuthHeader from "../components/auth/AuthHeader";
 import { useWallpaper } from "../context/wallpaper";
+import { useChatStore } from "../store/useChatStore";
+import { useSelectedConversation } from "../hooks/useSelectedConversation";
+import { useEffect } from "react";
+import ChatSidebar from "../components/chat/ChatSidebar";
+import { ChatHeader } from "../components/chat/ChatHeader";
+import { MessageList } from "../components/chat/MessageList";
+import { ChatComposer } from "../components/chat/ChatComposer";
 
 function ChatPage() {
   const { frameStyle } = useWallpaper();
 
+  const getConversations = useChatStore((state) => state.getConversations);
+  const getMessages = useChatStore((state) => state.getMessages);
+  const getUsers = useChatStore((state) => state.getUsers);
+  const subscribeToMessages = useChatStore((state) => state.subscribeToMessages);
+  const unsubscribeFromMessages = useChatStore((state) => state.unsubscribeFromMessages);
+
+  const { activeConversation, activeConversationId, isLargeScreen } = useSelectedConversation();
+
+  useEffect(() => {
+    getUsers();
+    getConversations();
+  }, [getConversations, getUsers]);
+
+  useEffect(() => {
+    if (!activeConversationId) return;
+
+    getMessages(activeConversationId);
+    subscribeToMessages(activeConversationId);
+
+    // cleanup
+    return () => unsubscribeFromMessages();
+  }, [getMessages, activeConversationId, subscribeToMessages, unsubscribeFromMessages]);
+
   return (
-    <main
-      style={frameStyle}
-      className="flex min-h-screen items-center justify-center bg-linear-to-br from-accent/40 via-background to-accent/20 p-4 sm:p-8"
-    >
-      <div className="flex min-h-96 w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-border bg-background/80 shadow-2xl backdrop-blur-xl">
-        {/* Header includes the logout button because the user is signed in here. */}
-        <AuthHeader />
-        <div className="flex flex-1 items-center justify-center text-muted">Chat Page</div>
+    <div className="flex h-dvh flex-col overflow-hidden p-2 sm:p-3 md:p-8" style={frameStyle}>
+      <div className="mx-auto flex w-full max-w-6xl flex-1 overflow-hidden rounded-2xl border border-border bg-background text-foreground">
+        <ChatSidebar />
+
+        <div
+          className={`flex-1 flex-col overflow-hidden ${!isLargeScreen && !activeConversationId ? "hidden lg:flex" : "flex"
+            }`}
+        >
+          <ChatHeader />
+          <MessageList />
+
+          {activeConversation ? <ChatComposer /> : null}
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
-
 export default ChatPage;

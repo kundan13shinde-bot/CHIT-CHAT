@@ -1,11 +1,12 @@
 import express from "express"
-import {getUsersForSidebar} from "../controllers/message.controller.js";
+import { getUsersForSidebar } from "../controllers/message.controller.js";
 import { protectRoute } from "../middleware/auth.js";
-import {getConversationForSidebar} from "../controllers/message.controller.js";
+import { getConversationForSidebar } from "../controllers/message.controller.js";
 import { getMessages, sendMessage } from "../controllers/message.controller.js";
 import { upload } from "../middleware/upload.js";
 
 const router = express.Router();
+
 
 router.get("/users", protectRoute, getUsersForSidebar);
 router.get("/conversations", protectRoute, getConversationForSidebar);
