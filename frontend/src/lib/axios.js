@@ -1,7 +1,10 @@
 import axios from "axios";
 
 export const axiosInstance = axios.create({
-  baseURL: import.meta.env.DEV ? "http://localhost:3000/api" : "/api",
+  baseURL: import.meta.env.DEV
+    ? "http://localhost:3000/api"
+    : `${import.meta.env.VITE_RENDER_BACKEND_API_URL}/api`,
+
   withCredentials: true,
 });
 
