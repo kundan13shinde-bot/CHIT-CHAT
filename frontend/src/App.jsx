@@ -12,6 +12,9 @@ function App() {
   const { isSignedIn, isLoaded, getToken } = useAuth()
   const checkAuth = useAuthStore((state) => state.checkAuth)
   const clearAuth = useAuthStore((state) => state.clearAuth)
+  const authUser = useAuthStore((state) => state.authUser)
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth)
+  const isSyncingUser = useAuthStore((state) => state.isSyncingUser)
 
   useEffect(() => {
     if (!isLoaded) return
@@ -24,6 +27,10 @@ function App() {
 
   // Wait for Clerk to finish loading, otherwise we'd redirect before knowing the auth state.
   if (!isLoaded) return <PageLoader />
+
+  // Signed in with Clerk but the MongoDB profile isn't verified/synced yet: hold the chat page back,
+  // otherwise its API calls hit the backend first and get "404 User profile is not synced yet".
+  if (isSignedIn && !authUser && (isCheckingAuth || isSyncingUser)) return <PageLoader />
 
   return (
     <>

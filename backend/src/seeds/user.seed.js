@@ -4,6 +4,7 @@ import User from "../models/User.js";
 import { ConnectDB } from "../lib/db.js";
 
 const testUsers = [
+  
   {
     clerkId: "seed_user_aarav_sharma",
     email: "aarav.sharma@example.com",
