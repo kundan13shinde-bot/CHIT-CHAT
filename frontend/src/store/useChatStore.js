@@ -20,6 +20,7 @@ export const useChatStore = create((set, get) => ({
   isMessageLoading: false,
   isSendingMessage: false,
   isSendingMedia: false,
+  isTyping: false,
 
   // UI & sidebar state
   searchQuery: "",
@@ -95,6 +96,7 @@ export const useChatStore = create((set, get) => ({
       selectedUser: user,
       activeConversationId: user?._id || null,
       messages: [],
+      isTyping: false,
     });
 
     if (user?._id) {
@@ -197,6 +199,8 @@ export const useChatStore = create((set, get) => ({
     if (!socket) return;
 
     socket.off("newMessage");
+    socket.off("userTyping");
+    socket.off("userStoppedTyping");
 
     socket.on("newMessage", (newMessage) => {
       const { selectedConversation, activeConversationId, messages, isSoundEnabled, conversations, users } = get();
@@ -210,7 +214,7 @@ export const useChatStore = create((set, get) => ({
       if (isCurrentChat) {
         const alreadyExists = messages.some((m) => m._id === newMessage._id);
         if (!alreadyExists) {
-          set({ messages: [...messages, newMessage] });
+          set({ messages: [...messages, newMessage], isTyping: false });
         }
       }
 
@@ -238,6 +242,23 @@ export const useChatStore = create((set, get) => ({
         }
       }
     });
+
+    // Real-time typing indicators for current active conversation
+    socket.on("userTyping", ({ senderId }) => {
+      const { selectedConversation, activeConversationId } = get();
+      const currentTargetId = chatId || activeConversationId || selectedConversation?._id;
+      if (currentTargetId && String(senderId) === String(currentTargetId)) {
+        set({ isTyping: true });
+      }
+    });
+
+    socket.on("userStoppedTyping", ({ senderId }) => {
+      const { selectedConversation, activeConversationId } = get();
+      const currentTargetId = chatId || activeConversationId || selectedConversation?._id;
+      if (currentTargetId && String(senderId) === String(currentTargetId)) {
+        set({ isTyping: false });
+      }
+    });
   },
 
   // Clean up socket listener
@@ -245,6 +266,9 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
     if (socket) {
       socket.off("newMessage");
+      socket.off("userTyping");
+      socket.off("userStoppedTyping");
     }
+    set({ isTyping: false });
   },
 }));

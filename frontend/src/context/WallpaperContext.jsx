@@ -7,11 +7,15 @@ const STORAGE_KEY = "chat-wallpaper-id";
 function readStoredWallpaperId() {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return getWallpaperById(stored).id;
+    if (stored) {
+      const found = getWallpaperById(stored);
+      if (found?.id) return found.id;
+    }
   } catch {
     // ignore
   }
-  return DEFAULT_WALLPAPER_ID;
+  const defaultWp = getWallpaperById(DEFAULT_WALLPAPER_ID);
+  return defaultWp?.id || "none";
 }
 
 export function WallpaperProvider({ children }) {
@@ -26,7 +30,10 @@ export function WallpaperProvider({ children }) {
   }, [wallpaperId]);
 
   const wallpaper = getWallpaperById(wallpaperId);
-  const setWallpaperId = (id) => setWallpaperIdState(getWallpaperById(id).id);
+  const setWallpaperId = (id) => {
+    const found = getWallpaperById(id);
+    setWallpaperIdState(found?.id || DEFAULT_WALLPAPER_ID);
+  };
   const frameStyle = wallpaperFrameStyle(wallpaper);
 
   return (

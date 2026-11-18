@@ -16,7 +16,7 @@ function ChatPage() {
   const subscribeToMessages = useChatStore((state) => state.subscribeToMessages);
   const unsubscribeFromMessages = useChatStore((state) => state.unsubscribeFromMessages);
 
-  const { activeConversation, activeConversationId, isLargeScreen } = useSelectedConversation();
+  const { activeConversation, activeConversationId } = useSelectedConversation();
 
   useEffect(() => {
     getUsers();
@@ -34,13 +34,14 @@ function ChatPage() {
   }, [getMessages, activeConversationId, subscribeToMessages, unsubscribeFromMessages]);
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden p-2 sm:p-3 md:p-8" style={frameStyle}>
-      <div className="mx-auto flex w-full max-w-6xl flex-1 overflow-hidden rounded-2xl border border-border bg-background text-foreground">
+    <div className="flex h-dvh flex-col overflow-hidden p-0 sm:p-3 md:p-6 lg:p-8" style={frameStyle}>
+      <div className="mx-auto flex h-full w-full max-w-6xl flex-1 overflow-hidden rounded-none border-0 sm:rounded-2xl sm:border border-border bg-background text-foreground shadow-2xl">
         <ChatSidebar />
 
         <div
-          className={`flex-1 flex-col overflow-hidden ${!isLargeScreen && !activeConversationId ? "hidden lg:flex" : "flex"
-            }`}
+          className={`flex-1 flex-col overflow-hidden ${
+            !activeConversationId ? "hidden md:flex" : "flex"
+          }`}
         >
           <ChatHeader />
           <MessageList />

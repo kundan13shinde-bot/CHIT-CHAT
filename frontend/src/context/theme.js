@@ -3,7 +3,7 @@ import { heroTheme } from "../data/herotheme";
 
 export const ThemeContext = createContext(null);
 
-export const DEFAULT_THEME_ID = "default";
+export const DEFAULT_THEME_ID = "forest-dark";
 
 const THEME_IDS = new Set(heroTheme.map((t) => t.id));
 

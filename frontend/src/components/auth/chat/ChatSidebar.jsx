@@ -1,5 +1,8 @@
 import { useEffect, useMemo } from "react";
+import { useClerk } from "@clerk/react";
+import { LogOut, Search } from "lucide-react";
 import { useChatStore } from "../../../store/useChatStore";
+import { useAuthStore } from "../../../store/useAuthStore";
 import { useSelectedConversation } from "../../../hooks/useSelectedConversation";
 import { ConversationRow } from "./ConversationRow";
 
@@ -9,6 +12,7 @@ const TABS = [
 ];
 
 function ChatSidebar() {
+  const { signOut } = useClerk();
   const users = useChatStore((s) => s.users);
   const conversations = useChatStore((s) => s.conversations);
   const searchQuery = useChatStore((s) => s.searchQuery);
@@ -19,8 +23,9 @@ function ChatSidebar() {
   const getConversations = useChatStore((s) => s.getConversations);
   const isUserLoading = useChatStore((s) => s.isUserLoading);
   const isConversationLoading = useChatStore((s) => s.isConversationLoading);
+  const onlineUsers = useAuthStore((s) => s.onlineUsers);
 
-  const { selectedConversation, mapUserToConversation, selectUserAsConversation } =
+  const { selectedConversation, activeConversationId, mapUserToConversation, selectUserAsConversation } =
     useSelectedConversation();
 
   // Load both lists once when the sidebar mounts
@@ -34,6 +39,8 @@ function ChatSidebar() {
 
   // Pick the list for the active tab, add online status, then apply search
   const list = useMemo(() => {
+    // Re-evaluates whenever online status or lists change
+    void onlineUsers;
     const source = mapUserToConversation(isChatsTab ? conversations : users) || [];
     const query = searchQuery.trim().toLowerCase();
     if (!query) return source;
@@ -41,7 +48,7 @@ function ChatSidebar() {
       (u) =>
         u.fullname?.toLowerCase().includes(query) || u.email?.toLowerCase().includes(query)
     );
-  }, [isChatsTab, conversations, users, searchQuery, mapUserToConversation]);
+  }, [isChatsTab, conversations, users, searchQuery, onlineUsers, mapUserToConversation]);
 
   const handleSelect = (user) => {
     selectUserAsConversation(user);
@@ -56,16 +63,37 @@ function ChatSidebar() {
       : "No users available";
 
   return (
-    <aside className="flex w-full flex-col border-r border-border md:w-80">
-      {/* Search */}
-      <div className="p-3">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={isChatsTab ? "Search chats..." : "Search users..."}
-          className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
-        />
+    <aside
+      className={`flex-col border-r border-border md:w-80 shrink-0 ${
+        activeConversationId ? "hidden md:flex" : "flex w-full"
+      }`}
+    >
+      {/* Search & Actions */}
+      <div className="flex items-center gap-2 p-3">
+        <div className="relative flex-1">
+          <Search
+            size={16}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+          />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={isChatsTab ? "Search chats..." : "Search users..."}
+            className="w-full rounded-xl border border-border bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-accent"
+          />
+        </div>
+
+        {/* Mobile logout button next to search */}
+        <button
+          type="button"
+          onClick={() => signOut()}
+          title="Sign out"
+          aria-label="Sign out"
+          className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-muted transition hover:bg-destructive/10 hover:text-destructive active:scale-95 md:hidden"
+        >
+          <LogOut size={16} />
+        </button>
       </div>
 
       {/* Tabs */}

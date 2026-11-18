@@ -2,7 +2,9 @@ import { create } from "zustand";
 import { io } from "socket.io-client";
 import { axiosInstance } from "../lib/axios.js";
 
-const SOCKET_URL = import.meta.env.DEV ? "http://localhost:3000" : "/";
+const SOCKET_URL =
+  import.meta.env.VITE_BACKEND_URL ||
+  (import.meta.env.DEV ? "http://localhost:3000" : "/");
 
 async function authHeaders(getToken) {
   if (typeof getToken !== "function") return {};
@@ -62,15 +64,24 @@ export const useAuthStore = create((set, get) => ({
 
   connectSocket: () => {
     const { authUser, socket } = get();
-    if (!authUser?._id || socket) return;
+    if (!authUser?._id) return;
+
+    // If socket is already connected, no need to reconnect
+    if (socket?.connected) return;
+
+    // If socket instance exists but is disconnected, trigger reconnect
+    if (socket) {
+      socket.connect();
+      return;
+    }
 
     const newSocket = io(SOCKET_URL, {
-      query: { userId: authUser._id },
+      query: { userId: String(authUser._id) },
       withCredentials: true,
     });
 
     newSocket.on("getOnlineUsers", (userIds) => {
-      set({ onlineUsers: userIds });
+      set({ onlineUsers: (userIds || []).map(String) });
     });
 
     set({ socket: newSocket });
