@@ -14,25 +14,37 @@ export const wallpapers = [
     { id: "miyamoto-musashi", label: "Miyamoto Musashi", src: url("_Miyamoto Musashi.jpg") },
 ];
 
-export const DEFAULT_WALLPAPER_ID = "none";
+export const DEFAULT_WALLPAPER_ID = "ghost-of-tsushima";
 
-// Falls back to "none" for unknown ids (e.g. a stale value in localStorage).
-export const getWallpaperById = (id) =>
-    wallpapers.find((w) => w.id === id) ?? wallpapers.find((w) => w.id === DEFAULT_WALLPAPER_ID);
+// Guaranteed to return a valid wallpaper object, never undefined
+export const getWallpaperById = (id) => {
+    if (!id) return wallpapers[0];
+
+    const match =
+        wallpapers.find((w) => w.id === id) ??
+        wallpapers.find((w) => w.src && w.src.includes(encodeURI(id))) ??
+        wallpapers.find((w) => w.id === DEFAULT_WALLPAPER_ID) ??
+        wallpapers[0];
+
+    return match || wallpapers[0];
+};
 
 // Use as a CSS value: style={{ backgroundImage: wallpaperCss(id) }}
 export const wallpaperCss = (id) => {
     const w = getWallpaperById(id);
-    return w.src ? `url("${w.src}")` : "none";
+    return w?.src ? `url("${w.src}")` : "none";
 };
 
 // Ready-to-spread inline style for the chat area.
-export const wallpaperFrameStyle = (wallpaper) =>
-    wallpaper.src
-        ? {
-              backgroundImage: `url("${wallpaper.src}")`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-          }
-        : {};
+export const wallpaperFrameStyle = (wallpaper) => {
+    if (!wallpaper || !wallpaper.src) {
+        return {};
+    }
+
+    return {
+        backgroundImage: `url("${wallpaper.src}")`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+    };
+};

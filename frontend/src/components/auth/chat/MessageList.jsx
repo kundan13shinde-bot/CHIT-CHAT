@@ -4,47 +4,58 @@ import { NoConversationPlaceholder } from "./NoConversationPlaceholder";
 import { useSelectedConversation } from "../../../hooks/useSelectedConversation";
 
 export function MessageList() {
-    const {
-        activeConversation,
-        selectedConversation,
-        messages,
-        isMessageLoading,
-    } = useSelectedConversation();
+  const {
+    activeConversation,
+    selectedConversation,
+    messages,
+    isMessageLoading,
+    isTyping,
+  } = useSelectedConversation();
 
-    const user = activeConversation || selectedConversation;
-    const bottomRef = useScrollToBottom(messages);
+  const user = activeConversation || selectedConversation;
+  const bottomRef = useScrollToBottom([messages, isTyping]);
 
-    return (
-        <div className="relative flex flex-1 flex-col overflow-hidden">
-            {user ? (
-                <div className="flex flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-3 py-4 sm:px-5">
-                    {isMessageLoading ? (
-                        <div className="flex flex-1 items-center justify-center text-xs text-muted">
-                            Loading messages...
-                        </div>
-                    ) : messages.length === 0 ? (
-                        <div className="flex flex-1 flex-col items-center justify-center text-center text-xs text-muted">
-                            <p className="font-medium text-foreground">No messages yet</p>
-                            <p className="mt-1">Say hello to {user.fullname}! 👋</p>
-                        </div>
-                    ) : (
-                        <>
-                            <p className="my-2 text-center text-[10px] font-semibold uppercase tracking-widest text-muted">
-                                Conversation started
-                            </p>
-                            {messages.map((message) => (
-                                <MessageBubble key={message._id || message.id} message={message} />
-                            ))}
-                            <div ref={bottomRef} />
-                        </>
-                    )}
+  return (
+    <div className="relative flex flex-1 flex-col overflow-hidden">
+      {user ? (
+        <div className="flex flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-3 py-4 sm:px-5">
+          {isMessageLoading ? (
+            <div className="flex flex-1 items-center justify-center text-xs text-muted">
+              Loading messages...
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="flex flex-1 flex-col items-center justify-center text-center text-xs text-muted">
+              <p className="font-medium text-foreground">No messages yet</p>
+              <p className="mt-1">Say hello to {user.fullname}! 👋</p>
+            </div>
+          ) : (
+            <>
+              <p className="my-2 text-center text-[10px] font-semibold uppercase tracking-widest text-muted">
+                Conversation started
+              </p>
+              {messages.map((message) => (
+                <MessageBubble key={message._id || message.id} message={message} />
+              ))}
+
+              {/* Real-time typing bubble for incoming keystrokes */}
+              {isTyping && (
+                <div className="flex items-center gap-1.5 self-start rounded-2xl border border-border bg-surface px-3.5 py-2.5 text-muted shadow-xs">
+                  <span className="size-1.5 animate-bounce rounded-full bg-accent [animation-delay:-0.3s]" />
+                  <span className="size-1.5 animate-bounce rounded-full bg-accent [animation-delay:-0.15s]" />
+                  <span className="size-1.5 animate-bounce rounded-full bg-accent" />
+                  <span className="sr-only">{user.fullname} is typing</span>
                 </div>
-            ) : (
-                <NoConversationPlaceholder />
-            )}
+              )}
+
+              <div ref={bottomRef} />
+            </>
+          )}
         </div>
-    );
+      ) : (
+        <NoConversationPlaceholder />
+      )}
+    </div>
+  );
 }
 
 export default MessageList;
-

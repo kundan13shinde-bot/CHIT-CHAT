@@ -10,17 +10,24 @@ import { useMediaQuery } from "./useMediaquery.js";
 export function formatUserAsConversation(user, onlineUsers = [], conversations = []) {
   if (!user) return null;
 
-  const existingConv = conversations.find(
-    (c) => c._id === user._id || c.user?._id === user._id
+  const userId = String(user._id || user.id || "");
+  const isOnline = Boolean(
+    userId && onlineUsers.some((onlineId) => String(onlineId) === userId)
   );
+
+  const existingConv = conversations.find((c) => {
+    const cId = String(c._id || c.id || "");
+    const cUserId = String(c.user?._id || c.user?.id || "");
+    return cId === userId || cUserId === userId;
+  });
 
   return {
     ...user,
-    _id: user._id,
+    _id: user._id || user.id,
     fullname: user.fullname || user.name || "User",
     email: user.email || "",
     profilePic: user.profilePic || "",
-    isOnline: Boolean(user._id && onlineUsers.includes(user._id)),
+    isOnline,
     lastMessage: existingConv?.lastMessage || null,
     lastMessageAt: existingConv?.lastMessageAt || user.updatedAt || null,
   };
@@ -44,15 +51,18 @@ export function useSelectedConversation() {
   const messages = useChatStore((state) => state.messages);
   const isMessageLoading = useChatStore((state) => state.isMessageLoading);
   const isSendingMessage = useChatStore((state) => state.isSendingMessage);
+  const isTyping = useChatStore((state) => state.isTyping);
   const sendMessage = useChatStore((state) => state.sendMessage);
   const getMessages = useChatStore((state) => state.getMessages);
 
   const onlineUsers = useAuthStore((state) => state.onlineUsers);
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
 
-  // Check if the selected user is currently connected via socket
+  // Check if the currently active/selected user is connected via socket
+  const activeTarget = selectedConversation || null;
+  const activeTargetId = String(activeTarget?._id || activeTarget?.id || "");
   const isOnline = Boolean(
-    selectedConversation?._id && onlineUsers.includes(selectedConversation._id)
+    activeTargetId && onlineUsers.some((id) => String(id) === activeTargetId)
   );
 
   const clearSelectedConversation = useCallback(() => {
@@ -96,6 +106,7 @@ export function useSelectedConversation() {
     hasSelectedConversation: Boolean(selectedConversation),
     isLargeScreen,
     isOnline,
+    isTyping,
     messages,
     isMessageLoading,
     isSendingMessage,
